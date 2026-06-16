@@ -10,7 +10,7 @@ def analyze():
     text = data.get('text', '').lower()
 
     # по приоритетам проходить, ключевые слова в массиве. Можно запилить отдельный файлик
-    if any(word in text for word in ['срочно', 'дедлайн', 'аврал', 'важно', 'до завтра']):
+    if any(word in text for word in ['срочно', 'срочная', 'немедленно','побыстрее', 'дедлайн', 'аврал', 'важно', 'до завтра']):
         priority = 'high'
     elif any(word in text for word in ['можно потом', 'попозже', 'позже', 'не срочно']):
         priority = 'low'

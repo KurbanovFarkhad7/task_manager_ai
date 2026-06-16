@@ -4,6 +4,9 @@ const pool = require('../db/pool');
 const authenticateToken = require('../middleware/auth');
 const router = express.Router();
 
+// python service
+const axios = require('axios');
+
 // для всех маршрутов требование авторизации
 router.use(authenticateToken);
 
@@ -31,14 +34,32 @@ router.post('/', async (req, res) => {
     }
 
     try {
+        // python service, отправляет текст для анализа
+        const fullText =  `${title} ${description || ''}`;
+        let priority = 'medium';
+        let category = 'other';
+
+        try {
+            const analysis = await axios.post('http://localhost:5001/analyze', {
+                text: fullText
+            });
+            priority = analysis.data.priority;
+            category = analysis.data.category;
+            console.log(`Анализ ${priority} / ${category}`);
+        } catch (pythonErr) {
+            console.error('Python сервис недоступен, использовать значения по умолчанию');
+        }
+
         // будет считывать с тела запроса по нужные индексы, подставлять их относительно друг друга, возвращая все данные
         const result = await pool.query(
             `INSERT INTO tasks (user_id, title, description, ended_at, status, priority, category)
-            VALUES ($1, $2, $3, $4, 'new', 'medium', 'other')
+            VALUES ($1, $2, $3, $4, 'new', $5, $6)
             RETURNING *`, 
-            [req.user.userId, title, description, ended_at || null]
+            [req.user.userId, title, description, ended_at || null, priority, category]
         );
+
         res.status(201).json(result.rows[0])
+
     } catch (err) {
         console.error(err);
         res.status(500).json({error: 'Ошибка создания задачи'});
