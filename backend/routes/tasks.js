@@ -26,6 +26,8 @@ router.get('/', async (req, res) => {
     }
 });
 
+
+// POST /api/tasks - создать новую задачу
 router.post('/', async (req, res) => {
     const {title, description, ended_at} = req.body;
 
@@ -71,7 +73,7 @@ router.put('/:id', async (req,res) => {
     const {id} = req.params;
     const {status} = req.body;
 
-    const validStatuses = ['new', 'in_progress', 'done'];
+    const validStatuses = ['new', 'active', 'done', 'inactive'];
     if (!status || !validStatuses.includes(status)) {
         return res.status(400).json({error: 'Неверный статус'});
     }
