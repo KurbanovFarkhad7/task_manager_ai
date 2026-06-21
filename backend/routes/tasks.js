@@ -14,9 +14,10 @@ router.use(authenticateToken);
 router.get('/', async (req, res) => {
     try {
         const result = await pool.query(
-            `SELECT id, title, description, status, priority, category, created_at, ended_at
-            FROM tasks WHERE user_id = $1
-            ORDER BY created_at DESC`,
+            `SELECT id, title, description, status, priority, category, created_at,
+                    to_char(ended_at, 'YYYY-MM-DD') as ended_at
+             FROM tasks WHERE user_id = $1
+             ORDER BY created_at DESC`,
             [req.user.userId]
         );
         res.json(result.rows);
@@ -69,32 +70,82 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/tasks/:id - обновляет задачи, берет какую-то по ид
-router.put('/:id', async (req,res) => {
-    const {id} = req.params;
-    const {status} = req.body;
-
-    const validStatuses = ['new', 'active', 'done', 'inactive'];
-    if (!status || !validStatuses.includes(status)) {
-        return res.status(400).json({error: 'Неверный статус'});
-    }
+router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { status, title, description, priority, category, ended_at } = req.body;
 
     try {
-        const result = await pool.query(
-            `UPDATE tasks
-            SET status = $1
-            WHERE id = $2 AND user_id = $3
-            RETURNING *`,
-            [status, id, req.user.userId]
+        // Проверяет, что задача существует и принадлежит пользователю
+        const checkResult = await pool.query(
+            'SELECT id FROM tasks WHERE id = $1 AND user_id = $2',
+            [id, req.user.userId]
         );
 
-        if (result.rows.length === 0) {
-            return res.status(404).json({error: 'Задача не найдена'});
+        if (checkResult.rows.length === 0) {
+            return res.status(404).json({ error: 'Задача не найдена' });
         }
+
+        // Строит динамический запрос
+        const updates = [];
+        const values = [];
+        let paramIndex = 1;
+
+        if (status !== undefined) {
+            const validStatuses = ['new', 'active', 'done', 'inactive'];
+            if (!validStatuses.includes(status)) {
+                return res.status(400).json({ error: 'Неверный статус' });
+            }
+            updates.push(`status = $${paramIndex++}`);
+            values.push(status);
+        }
+
+        if (title !== undefined) {
+            updates.push(`title = $${paramIndex++}`);
+            values.push(title);
+        }
+
+        if (description !== undefined) {
+            updates.push(`description = $${paramIndex++}`);
+            values.push(description);
+        }
+
+        if (priority !== undefined) {
+            const validPriorities = ['high', 'medium', 'low'];
+            if (!validPriorities.includes(priority)) {
+                return res.status(400).json({ error: 'Неверный приоритет' });
+            }
+            updates.push(`priority = $${paramIndex++}`);
+            values.push(priority);
+        }
+
+        if (category !== undefined) {
+            updates.push(`category = $${paramIndex++}`);
+            values.push(category);
+        }
+
+        if (ended_at !== undefined) {
+            updates.push(`ended_at = $${paramIndex++}`);
+            values.push(ended_at || null);
+        }
+
+        if (updates.length === 0) {
+            return res.status(400).json({ error: 'Нет данных для обновления' });
+        }
+
+        values.push(id, req.user.userId);
+        const query = `
+            UPDATE tasks 
+            SET ${updates.join(', ')} 
+            WHERE id = $${paramIndex++} AND user_id = $${paramIndex}
+            RETURNING *
+        `;
+
+        const result = await pool.query(query, values);
 
         res.json(result.rows[0]);
     } catch (err) {
         console.error(err);
-        res.status(500).json({error: 'Ошибка обновления задачи'});
+        res.status(500).json({ error: 'Ошибка обновления задачи' });
     }
 });
 

@@ -1,0 +1,139 @@
+.dashboard {
+    min-height: 100vh;
+    background: #f0f1f7;
+}
+
+.dashboard-header {
+    background: white;
+    padding: 16px 32px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-header h1 {
+    font-size: 22px;
+    color: #1a1a1a;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.logout-btn {
+    background: none;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.logout-btn:hover {
+    background: #e74c3c;
+    color: white;
+    border-color: #e74c3c;
+}
+
+.dashboard-main {
+    padding: 20px 32px;
+}
+
+
+body {
+    background: #F0F1F7 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.dashboard-layout {
+    display: flex;
+    height: 100vh;
+}
+.main {
+    margin-left: 220px;
+    flex: 1;
+    padding: 30px 40px;
+    overflow-x: auto;
+    height: 100vh;
+    background: #F0F1F7;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 40px;
+}
+
+.logo img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+
+.logo span {
+    color: #A18AEB;
+    font-size: 20px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex: 1;
+}
+
+.menu-item {
+    padding: 12px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #000000;
+    font-weight: 500;
+    font-size: 15px;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    font-family: inherit;
+}
+
+.menu-item:hover {
+    color: #5B3AC9;
+    background: #F0F1F7;
+}
+
+.menu-item.active {
+    color: #5B3AC9;
+    background: #F0F1F7;
+}
+
+.menu-item .icon {
+    font-size: 18px;
+}
+
+.menu-item.logout {
+    margin-top: auto;
+    color: #000000;
+}
+
+.menu-item.logout:hover {
+    color: #5B3AC9;
+}
+
+.menu-item.logout img {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
