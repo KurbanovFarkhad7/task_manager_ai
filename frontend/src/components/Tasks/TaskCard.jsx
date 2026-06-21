@@ -27,7 +27,7 @@ const TaskCard = ({ task, onEdit, onDragStart }) => {
                 </span>
                 {task.ended_at && (
                     <span className="task-date">
-                        📅 {new Date(task.ended_at).toISOString().split('T')[0]}
+                        до {new Date(task.ended_at).toISOString().split('T')[0]}
                     </span>
                 )}
                 {task.category && (

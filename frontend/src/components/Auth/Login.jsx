@@ -51,7 +51,7 @@ const Login = ({ onSwitchToRegister }) => {
                         <div className="forgot-row">
                             <a className="forgot-link">Forgot password?</a>
                         </div>
-                        <button type="submit" className="btn-login">Login →</button>
+                        <button type="submit" className="btn-login">Login</button>
                         <div className="create-account-row">
                             <button type="button" className="create-account-btn" onClick={onSwitchToRegister}>
                                 Create account
