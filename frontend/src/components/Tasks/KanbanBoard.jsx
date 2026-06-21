@@ -1,8 +1,11 @@
+// вся доска со всеми вкладками,  поиском, фильтрацией
 import { useState, useEffect } from 'react';
 import api from '../../api/axios';
 import TaskCard from './TaskCard';
 import TaskForm from './TaskForm';
 import '../../styles/kanban.css';
+
+import searchIcon from '../../assets/search.webp';
 
 const STATUSES = ['New', 'Active', 'Done', 'Inactive'];
 const STATUS_MAP = {
@@ -14,15 +17,19 @@ const STATUS_MAP = {
 
 const KanbanBoard = () => {
     const [tasks, setTasks] = useState([]);
+    const [filteredTasks, setFilteredTasks] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showForm, setShowForm] = useState(false);
     const [editingTask, setEditingTask] = useState(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [priorityFilter, setPriorityFilter] = useState('all');
 
     const fetchTasks = async () => {
         try {
             const response = await api.get('/tasks');
             setTasks(response.data);
+            setFilteredTasks(response.data);
         } catch (err) {
             setError('Ошибка загрузки задач');
         } finally {
@@ -33,6 +40,27 @@ const KanbanBoard = () => {
     useEffect(() => {
         fetchTasks();
     }, []);
+
+    // Фильтрация задач
+    useEffect(() => {
+        let result = [...tasks];
+
+        // Поиск по названию и описанию
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase().trim();
+            result = result.filter(task =>
+                task.title.toLowerCase().includes(query) ||
+                (task.description && task.description.toLowerCase().includes(query))
+            );
+        }
+
+        // Фильтр по приоритету
+        if (priorityFilter !== 'all') {
+            result = result.filter(task => task.priority === priorityFilter);
+        }
+
+        setFilteredTasks(result);
+    }, [searchQuery, priorityFilter, tasks]);
 
     const handleStatusChange = async (taskId, newStatus) => {
         try {
@@ -70,7 +98,6 @@ const KanbanBoard = () => {
         fetchTasks();
     };
 
-    // Drag-and-Drop
     const handleDragStart = (e, taskId) => {
         e.dataTransfer.setData('taskId', taskId);
     };
@@ -89,6 +116,15 @@ const KanbanBoard = () => {
         }
     };
 
+    // Обработчики
+    const handleSearchChange = (e) => {
+        setSearchQuery(e.target.value);
+    };
+
+    const handlePriorityFilterChange = (e) => {
+        setPriorityFilter(e.target.value);
+    };
+
     if (loading) return <div className="loading">Загрузка задач...</div>;
     if (error) return <div className="error-msg">{error}</div>;
 
@@ -96,20 +132,32 @@ const KanbanBoard = () => {
         <div className="kanban-container">
             <div className="top-bar">
                 <div className="search-wrapper">
-                    <span className="search-icon">🔍</span>
-                    <input type="text" placeholder="Search..." />
+                    <img src="/src/assets/search.webp" alt="Search" className="search-icon" />
+                    <input
+                        type="text"
+                        placeholder="Search..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                    />
                 </div>
                 <div className="filter-sort">
-                    <select className="priority-filter">
+                    <select
+                        className="priority-filter"
+                        value={priorityFilter}
+                        onChange={handlePriorityFilterChange}
+                    >
                         <option value="all">Priority: All</option>
                         <option value="high">High</option>
                         <option value="medium">Medium</option>
                         <option value="low">Low</option>
                     </select>
-                    <button className="btn-add" onClick={() => {
-                        setEditingTask(null);
-                        setShowForm(true);
-                    }}>
+                    <button
+                        className="btn-add"
+                        onClick={() => {
+                            setEditingTask(null);
+                            setShowForm(true);
+                        }}
+                    >
                         + Add New
                     </button>
                 </div>
@@ -128,7 +176,7 @@ const KanbanBoard = () => {
             <div className="board">
                 {STATUSES.map(status => {
                     const apiStatus = STATUS_MAP[status];
-                    const statusTasks = tasks.filter(t => t.status === apiStatus);
+                    const statusTasks = filteredTasks.filter(t => t.status === apiStatus);
                     return (
                         <div key={status} className="column">
                             <div className="column-header">

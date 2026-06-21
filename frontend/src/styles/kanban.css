@@ -506,3 +506,9 @@
 .btn-delete:hover {
     background: #c0392b;
 }
+
+.search-wrapper .search-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+}
