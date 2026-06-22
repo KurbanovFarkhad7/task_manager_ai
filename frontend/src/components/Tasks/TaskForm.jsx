@@ -159,7 +159,7 @@ const TaskForm = ({ task, onTaskCreated, onTaskUpdated, onDelete, onCancel }) =>
                     <div className="modal-actions">
                         {isEditing && (
                             <button type="button" className="btn-delete" onClick={handleDelete}>
-                                🗑 Удалить
+                            Удалить
                             </button>
                         )}
                         <button type="button" className="btn-cancel" onClick={onCancel}>
