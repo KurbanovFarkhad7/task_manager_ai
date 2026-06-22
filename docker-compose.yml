@@ -1,0 +1,76 @@
+version: '3.8'
+
+# postgre
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: task_manager_db
+    environment:
+      POSTGRES_DB: task_manager_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/db/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    networks:
+      - task_network
+
+  python-ai:
+    build:
+      context: ./python_service
+      dockerfile: Dockerfile
+    container_name: task_manager_python
+    ports:
+      - "5001:5001"
+    networks:
+      - task_network
+
+# express
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: task_manager_backend
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      DB_NAME: task_manager_db
+      JWT_SECRET: your_secret_key
+    depends_on:
+      - postgres
+      - python-ai
+    networks:
+      - task_network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+# react
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: task_manager_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - task_network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
+
+networks:
+  task_network:
