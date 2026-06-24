@@ -1,7 +1,5 @@
--- ============================================
 -- ЧИСТЫЙ ДАМП для Docker контейнера
 -- Только таблицы и данные, без CREATE ROLE/DATABASE
--- ============================================
 
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
@@ -10,7 +8,7 @@ SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
 
--- ---------- Создание таблиц ----------
+-- Создание таблиц 
 
 CREATE TABLE IF NOT EXISTS public.migrations (
     id integer NOT NULL,
@@ -72,20 +70,19 @@ CREATE SEQUENCE IF NOT EXISTS public.users_id_seq
 
 ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
--- ---------- Defaults ----------
+-- Defaults
 
 ALTER TABLE ONLY public.migrations ALTER COLUMN id SET DEFAULT nextval('public.migrations_id_seq'::regclass);
 ALTER TABLE ONLY public.tasks ALTER COLUMN id SET DEFAULT nextval('public.tasks_id_seq'::regclass);
 ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
--- ---------- Индексы ----------
+-- Индексы 
 
 CREATE INDEX IF NOT EXISTS idx_tasks_ended_at ON public.tasks USING btree (ended_at);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON public.tasks USING btree (status);
 CREATE INDEX IF NOT EXISTS idx_tasks_user_id ON public.tasks USING btree (user_id);
 
--- ---------- Constraints ----------
-
+-- Constraints 
 ALTER TABLE ONLY public.migrations
     ADD CONSTRAINT migrations_name_key UNIQUE (name);
 
@@ -104,11 +101,9 @@ ALTER TABLE ONLY public.users
 ALTER TABLE ONLY public.tasks
     ADD CONSTRAINT tasks_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.users(id) ON DELETE CASCADE;
 
--- ============================================
--- ДАННЫЕ (ПРАВИЛЬНЫЙ ПОРЯДОК: users → tasks → migrations)
--- ============================================
+-- ДАННЫЕ --
 
--- ---------- ПОЛЬЗОВАТЕЛИ ----------
+-- ПОЛЬЗОВАТЕЛИ 
 INSERT INTO public.users (id, email, password_hash, last_name, first_name, middle_name, created_at) VALUES
 (1, 'admin@mail.ru', '$2b$10$5w8ZQNpLxqN9ZqLxqN9ZqLxqN9ZqLxqN9ZqLxqN9ZqLxqN9ZqLxqN9ZqL', 'Админ', 'Админский', 'Админович', '2026-06-02 03:21:02.539757'),
 (2, 'user@mail.ru', '$2b$10$7xYzA1B2C3D4E5F6G7H8I9J0K1L2M3N4O5P6Q7R8S9T0U1V2W3X4Y5Z6', 'Юзер', 'Юзеров', 'Юзерович', '2026-06-02 03:21:02.539757'),
@@ -131,13 +126,13 @@ INSERT INTO public.tasks (id, user_id, title, description, created_at, status, p
 (14, 5, 'Test', '123', '2026-06-22 20:09:09.134679', 'active', 'low', 'other', '2026-06-24')
 ON CONFLICT (id) DO NOTHING;
 
--- ---------- МИГРАЦИИ ----------
+-- МИГРАЦИИ
 INSERT INTO public.migrations (id, name, applied_at) VALUES
 (1, '20260620_add_inactive_status.sql', '2026-06-21 14:25:51.939043'),
 (2, '20260622_change_ended_at_to_date.sql', '2026-06-21 14:25:51.953093')
 ON CONFLICT (id) DO NOTHING;
 
--- ---------- Сброс последовательностей ----------
+-- Сброс последовательностей 
 
 SELECT pg_catalog.setval('public.users_id_seq', COALESCE((SELECT MAX(id) FROM public.users), 1), true);
 SELECT pg_catalog.setval('public.tasks_id_seq', COALESCE((SELECT MAX(id) FROM public.tasks), 1), true);
