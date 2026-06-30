@@ -35,7 +35,10 @@ JWT_SECRET=your_secret_key_here
 ### 3. Запустить Docker
 
 ```bash
-docker compose up --build
+docker compose up --build # При запуске в первый раз, ЛИБО ПРИ ИЗМЕНЕНИИ ПРОЕКТА
+
+docker compose up -d # Повторно, запуск в фоне
+docker compose down # Остановить
 ```
 
 ### 4. Открыть в браузере
@@ -94,10 +97,10 @@ npm run migrate
 ### Задачи
 | Метод | Эндпоинт | Назначение | Тело запроса |
 |-------|----------|------------|--------------|
-| GET | `/api/tasks` | Просмотр задач | `Пустое` |
+| GET | `/api/tasks` | Просмотр задач | Пусто |
 | POST | `/api/tasks` | Создать новую задачу | `{ "title": "Срочно подготовить презентацию" }` |
-| DELETE | `/api/tasks/:id` | Удалить задачу | - |
-| PUT | `/api/tasks/:id` | Обновить статус задачи | `{ "status": "completed" }` |
+| DELETE | `/api/tasks/:id` | Удалить задачу | Пусто |
+| PUT | `/api/tasks/:id` | Обновить статус задачи | `{ "status": "done" }` |
 
 ### Python сервис
 | Метод | Эндпоинт | Назначение | Тело запроса |
@@ -153,6 +156,13 @@ cd python_service
 pip install -r requirements.txt
 python app.py # http://localhost:5001
 ```
+Также редактировать routes/tasks.js, изменив URL контейнера на локальный
+'http://python-ai:5001/analyze' на 'http://localhost:5001/analyze'
+Пересобрать проект
+```bash
+docker compose up --build
+```
+
 ### 4. Frontend
 ```bash
 cd frontend

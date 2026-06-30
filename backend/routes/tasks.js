@@ -43,7 +43,7 @@ router.post('/', async (req, res) => {
         let category = 'other';
 
         try {
-            const analysis = await axios.post('http://localhost:5001/analyze', {
+            const analysis = await axios.post('http://python-ai:5001/analyze', {
                 text: fullText
             });
             priority = analysis.data.priority;
